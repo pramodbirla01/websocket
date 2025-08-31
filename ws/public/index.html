@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Socket.IO Chat with Usernames</title>
+</head>
+<body>
+  <h2>Chat with Usernames</h2>
+
+  <input id="usernameInput" placeholder="Enter username..." />
+  <button onclick="setUsername()">Set Username</button>
+
+  <h3>Connected Users:</h3>
+  <ul id="users"></ul>
+
+  <h3>Private Message</h3>
+  <input id="targetUser" placeholder="Target username..." />
+  <input id="msgInput" placeholder="Type private message..." />
+  <button onclick="sendPrivate()">Send Private</button>
+
+  <h3>Group Chat</h3>
+  <input id="roomInput" placeholder="Room name..." />
+  <button onclick="joinRoom()">Join Room</button>
+  <input id="roomMsgInput" placeholder="Message to room..." />
+  <button onclick="sendRoomMessage()">Send to Room</button>
+
+  <div id="messages"></div>
+
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:5000");
+
+    socket.on("connect", () => {
+      log("✅ Connected to server");
+    });
+
+    function setUsername() {
+      const username = document.getElementById("usernameInput").value;
+      if (username) {
+        socket.emit("setUsername", username);
+        log(`You set username: ${username}`);
+      }
+    }
+
+    socket.on("userList", (users) => {
+      const ul = document.getElementById("users");
+      ul.innerHTML = "";
+      for (const id in users) {
+        ul.innerHTML += `<li>${users[id]}</li>`;
+      }
+    });
+
+    socket.on("chatMessage", (msg) => {
+      log("📩 " + msg);
+    });
+
+    socket.on("privateMessage", (msg) => {
+      log("🔒 Private: " + msg);
+    });
+
+    function sendPrivate() {
+      const toUsername = document.getElementById("targetUser").value;
+      const msg = document.getElementById("msgInput").value;
+      if (toUsername && msg) {
+        socket.emit("privateMessage", { toUsername, msg });
+        log(`📤You (to ${toUsername}): ${msg}`);
+      }
+    }
+
+    function joinRoom() {
+      const room = document.getElementById("roomInput").value;
+      if (room) {
+        socket.emit("joinRoom", room);
+      }
+    }
+
+    function sendRoomMessage() {
+      const room = document.getElementById("roomInput").value;
+      const msg = document.getElementById("roomMsgInput").value;
+      if (room && msg) {
+        socket.emit("roomMessage", { room, msg });
+        log(`📤You (to ${room}): ${msg}`);
+      }
+    }
+
+    function log(message) {
+      const div = document.getElementById("messages");
+      div.innerHTML += `<p>${message}</p>`;
+    }
+  </script>
+</body>
+</html>

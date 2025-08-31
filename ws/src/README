@@ -1,0 +1,18 @@
+GROUP
+ROOM
+USERNAME
+DM PERSONAL
+OTHER WITH NAME 
+
+
+socket.emit → only sender ✔
+
+io.emit → everyone (all sockets) ✔
+
+socket.broadcast.emit → everyone except sender ✔
+
+io.to(room).emit → only a room 
+
+io.to(socketId).emit → private ✔
+
+username
